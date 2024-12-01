@@ -1,60 +1,33 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <map>
-#include <algorithm>
+
+#include "ArgumentParser.hpp"
+#include "Calculator.hpp"
+#include "FileReader.hpp"
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input>" << std::endl;
-        return (1);
-    }
+    try {
+        HistorianHysteria::ArgumentParser parser(argc, argv);
 
-    // We need to read the input file
-    std::ifstream input(argv[1]);
-    if (!input.is_open()) {
-        std::cerr << "Error: could not open file " << argv[1] << std::endl;
-        return (1);
-    }
+        HistorianHysteria::FileReader reader(parser.getInputFile());
+        auto pairs = reader.readPairs();
 
-    // Read the input file
-    std::vector<std::string> lines;
-    std::string line;
-    while (std::getline(input, line)) {
-        lines.push_back(line);
-    }
-
-    // Each line has two numbers, we need to create two separate vectors to store them
-    std::vector<int> numbers1;
-    std::vector<int> numbers2;
-
-    // Parse the lines
-    for (const auto& l : lines) {
-        size_t pos = l.find(' ');
-        if (pos == std::string::npos) {
-            std::cerr << "Error: invalid input file" << std::endl;
-            return (1);
+        int result = 0;
+        switch (parser.getPart()) {
+            case 1:
+                result = HistorianHysteria::Calculator::calculatePartOne(pairs);
+                std::cout << "Result (part 1): " << result << std::endl;
+                break;
+            case 2:
+                result = HistorianHysteria::Calculator::calculatePartTwo(pairs);
+                std::cout << "Result (part 2): " << result << std::endl;
+                break;
+            default:
+                throw std::invalid_argument("Error: part must be 1 or 2");
         }
-
-        numbers1.push_back(std::stoi(l.substr(0, pos)));
-        numbers2.push_back(std::stoi(l.substr(pos + 1)));
+    } catch (const std::exception &ex) {
+        std::cerr << ex.what() << std::endl;
+        return (1);
     }
-
-    // We need to determine how many times the numbers in the first vector appear in the second vector using a map
-    std::map<int, int> count;
-    for (const auto& n : numbers1) {
-        count[n] = std::count(numbers2.begin(), numbers2.end(), n);
-    }
-
-    // Now we need to sum key times value
-    int sum = 0;
-    for (const auto& c : count) {
-        sum += c.first * c.second;
-    }
-
-    // Print the result
-    std::cout << sum << std::endl;
 
     return (0);
 }
