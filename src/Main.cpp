@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
 #include <algorithm>
 
 int main(int argc, char* argv[]) {
@@ -40,14 +41,16 @@ int main(int argc, char* argv[]) {
         numbers2.push_back(std::stoi(l.substr(pos + 1)));
     }
 
-    // Now we must order the numbers in ascending order in both vectors
-    std::sort(numbers1.begin(), numbers1.end());
-    std::sort(numbers2.begin(), numbers2.end());
+    // We need to determine how many times the numbers in the first vector appear in the second vector using a map
+    std::map<int, int> count;
+    for (const auto& n : numbers1) {
+        count[n] = std::count(numbers2.begin(), numbers2.end(), n);
+    }
 
-    // Now we sum the distances between the numbers in both vectors
+    // Now we need to sum key times value
     int sum = 0;
-    for (size_t i = 0; i < numbers1.size(); ++i) {
-        sum += std::abs(numbers1[i] - numbers2[i]);
+    for (const auto& c : count) {
+        sum += c.first * c.second;
     }
 
     // Print the result
